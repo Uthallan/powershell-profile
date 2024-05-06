@@ -6,6 +6,7 @@ $canConnectToGitHub = Test-Connection github.com -Count 1 -Quiet -TimeoutSeconds
 
 # Import Modules and External Profiles
 # Ensure Terminal-Icons module is installed before importing
+if ($IsWindows) {
 if (-not (Get-Module -ListAvailable -Name Terminal-Icons)) {
     Install-Module -Name Terminal-Icons -Scope CurrentUser -Force -SkipPublisherCheck
 }
@@ -13,6 +14,7 @@ Import-Module -Name Terminal-Icons
 $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 if (Test-Path($ChocolateyProfile)) {
     Import-Module "$ChocolateyProfile"
+}
 }
 
 # Check for Profile Updates
@@ -56,10 +58,12 @@ function Update-PowerShell {
             $updateNeeded = $true
         }
 
-        if ($updateNeeded) {
+        if ($updateNeeded and $IsWindows) {
             Write-Host "Updating PowerShell..." -ForegroundColor Yellow
             winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
             Write-Host "PowerShell has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
+        } elseif ($updateNeeded and $IsLinux) {
+            Write-Warning "Powershell update available. Automation on Linux not yet implemented"
         } else {
             Write-Host "Your PowerShell is up to date." -ForegroundColor Green
         }
@@ -71,6 +75,7 @@ Update-PowerShell
 
 
 # Admin Check and Prompt Customization
+if ($IsWindows) {
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 function prompt {
     if ($isAdmin) { "[" + (Get-Location) + "] # " } else { "[" + (Get-Location) + "] $ " }
@@ -83,6 +88,7 @@ function Test-CommandExists {
     param($command)
     $exists = $null -ne (Get-Command $command -ErrorAction SilentlyContinue)
     return $exists
+}
 }
 
 # Editor Configuration
@@ -233,6 +239,7 @@ Set-PSReadLineOption -Colors @{
 }
 
 ## Final Line to set prompt
+if ($IsWindows) {
 oh-my-posh init pwsh --config https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/cobalt2.omp.json | Invoke-Expression
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& { (zoxide init powershell | Out-String) })
@@ -245,4 +252,5 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     } catch {
         Write-Error "Failed to install zoxide. Error: $_"
     }
+}
 }

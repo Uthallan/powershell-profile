@@ -17,15 +17,15 @@ if ($IsWindows) {
     # Check for root privileges on Linux
     $userId = $(whoami)
     if ($userId -ne 'root') {
-        Write-Warning "Please run this script with sudo or as root!"
-        break
+        Write-Warning "Script not running with sudo or as root!"
+        
     }
 } else {
     Write-Warning "Unsupported or unidentified operating system"
     break
 }
 
-Write-Host "Able to run elevated. Proceeding..."
+
 # Continue with the script for configuration tasks
 
 
@@ -79,6 +79,19 @@ if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
     }
 } else {
     try {
+        # Determine appropriate profile path based on OS and PowerShell Edition
+        $profilePath = ""
+        if ($IsWindows) {
+            if ($PSVersionTable.PSEdition -eq "Core") {
+                $profilePath = "$env:USERPROFILE\Documents\Powershell"
+            } elseif ($PSVersionTable.PSEdition -eq "Desktop") {
+                $profilePath = "$env:USERPROFILE\Documents\WindowsPowerShell"
+            }
+        } elseif ($IsLinux) {
+            $profilePath = "$env:HOME/.config/powershell"
+        }
+
+
         # Define the backup directory and create it if it doesn't exist
         $backupDir = Join-Path -Path $profilePath -ChildPath "pwshProfileBackups"
         if (-not (Test-Path -Path $backupDir)) {
@@ -107,14 +120,14 @@ if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
 
 
 # # OMP Install
-if ($IsWindows) {
-    try {
-        winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh
-    }
-    catch {
-        Write-Error "Failed to install Oh My Posh. Error: $_"
-    }
-}
+# if ($IsWindows) {
+#     try {
+#         winget install -e --accept-source-agreements --accept-package-agreements JanDeDobbeleer.OhMyPosh
+#     }
+#     catch {
+#         Write-Error "Failed to install Oh My Posh. Error: $_"
+#     }
+# }
 
 
 # Font Install
@@ -169,28 +182,28 @@ if ($IsWindows) {
 }
 
 # Choco install
-try {
-    if ($IsWindows) {
-        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-    } elseif ($IsLinux) {
-        Write-Host "Chocolatey installation not implemented for Linux. Skipping..."
-    }
-}
-catch {
-    Write-Error "Failed to install Chocolatey. Error: $_"
-}
+# try {
+#     if ($IsWindows) {
+#         Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+#     } elseif ($IsLinux) {
+#         Write-Host "Chocolatey installation not implemented for Linux. Skipping..."
+#     }
+# }
+# catch {
+#     Write-Error "Failed to install Chocolatey. Error: $_"
+# }
 
-# Terminal Icons Install
-try {
-    if ($IsWindows) {
-        Install-Module -Name Terminal-Icons -Repository PSGallery -Force
-    } elseif ($IsLinux) {
-        Write-Host "Terminal-Icons installation not implemented for Linux yet. Skipping..."
-    }
-}
-catch {
-    Write-Error "Failed to install Terminal Icons module. Error: $_"
-}
+# # Terminal Icons Install
+# try {
+#     if ($IsWindows) {
+#         Install-Module -Name Terminal-Icons -Repository PSGallery -Force
+#     } elseif ($IsLinux) {
+#         Write-Host "Terminal-Icons installation not implemented for Linux yet. Skipping..."
+#     }
+# }
+# catch {
+#     Write-Error "Failed to install Terminal Icons module. Error: $_"
+# }
 
 # zoxide Install
 try {
