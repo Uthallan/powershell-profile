@@ -31,14 +31,16 @@ function Update-ProfileVersion {
     try {
         $url = "https://raw.githubusercontent.com/Uthallan/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
         $oldhash = Get-FileHash $PROFILE
-        Write-Host "Profile at $PROFILE hashed as" $oldhash.Hash
+        #Write-Host "Profile at $PROFILE hashed as" $oldhash.Hash
         Invoke-RestMethod $url -OutFile "$env:HOME/temp/Microsoft.PowerShell_profile.ps1"
-        Write-Host "Downloaded profile from $url to $env:HOME/temp"
+        #Write-Host "Downloaded profile from $url to $env:HOME/temp"
         $newhash = Get-FileHash "$env:HOME/temp/Microsoft.PowerShell_profile.ps1"
-        Write-Host "Hashed profile from github as" $newhash.Hash
+        #Write-Host "Hashed profile from github as" $newhash.Hash
         if ($newhash.Hash -ne $oldhash.Hash) {
             Copy-Item -Path "$env:HOME/temp/Microsoft.PowerShell_profile.ps1" -Destination $PROFILE -Force
             Write-Host "Profile has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
+        } elseif ($newhash.Hash -eq $oldhash.Hash) {
+            Write-Host "Hashes match, no update needed"
         }
     } catch {
         Write-Error "Unable to check for $profile updates"
