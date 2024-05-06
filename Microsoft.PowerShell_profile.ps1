@@ -119,14 +119,8 @@ if ($IsWindows) {
 function touch($file) { "" | Out-File $file -Encoding ASCII }
 
 function ff($name) {
-    if ($IsLinux) {
-        Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
-            Write-Output $_.FullName  # Using the FullName property
-        }
-        return
-    }
     Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
-        Write-Output "$($_.directory)\$($_)"
+        Write-Output $_.FullName  # Using the FullName property
     }
 }ff
 
