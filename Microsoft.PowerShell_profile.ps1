@@ -98,19 +98,24 @@ function Test-CommandExists {
 }
 
 # Editor Configuration
-$EDITOR = if (Test-CommandExists nvim) { 'nvim' }
-          elseif (Test-CommandExists pvim) { 'pvim' }
-          elseif (Test-CommandExists vim) { 'vim' }
-          elseif (Test-CommandExists vi) { 'vi' }
-          elseif (Test-CommandExists code) { 'code' }
-          elseif (Test-CommandExists notepad++) { 'notepad++' }
-          elseif (Test-CommandExists sublime_text) { 'sublime_text' }
-          else { 'notepad' }
-Set-Alias -Name vim -Value $EDITOR
+if ($IsWindows) {
+    $EDITOR = if (Test-CommandExists nvim) { 'nvim' }
+            elseif (Test-CommandExists pvim) { 'pvim' }
+            elseif (Test-CommandExists vim) { 'vim' }
+            elseif (Test-CommandExists vi) { 'vi' }
+            elseif (Test-CommandExists code) { 'code' }
+            elseif (Test-CommandExists notepad++) { 'notepad++' }
+            elseif (Test-CommandExists sublime_text) { 'sublime_text' }
+            else { 'notepad' }
+    Set-Alias -Name vim -Value $EDITOR
 
-function Edit-Profile {
-    vim $PROFILE.CurrentUserAllHosts
+    function Edit-Profile {
+        vim $PROFILE.CurrentUserAllHosts
+    }
+} elseif ($IsLinux) {
+    
 }
+
 function touch($file) { "" | Out-File $file -Encoding ASCII }
 function ff($name) {
     Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {

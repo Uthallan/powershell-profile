@@ -52,14 +52,25 @@ if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
     try {
         # Determine appropriate profile path based on OS and PowerShell Edition
         $profilePath = ""
+        $downloadUrl = "https://github.com/Uthallan/powershell-profile/raw/main/Microsoft.PowerShell_profile.ps1"
+        
         if ($IsWindows) {
             if ($PSVersionTable.PSEdition -eq "Core") {
                 $profilePath = "$env:USERPROFILE\Documents\Powershell"
             } elseif ($PSVersionTable.PSEdition -eq "Desktop") {
                 $profilePath = "$env:USERPROFILE\Documents\WindowsPowerShell"
             }
+
+            $outputFile = Join-Path -Path $profilePath -ChildPath "Microsoft.PowerShell_profile.ps1"
+            Invoke-RestMethod -Uri $downloadUrl -OutFile $outputFile
+            Write-Host "The profile @ [$outputFile] has been created."
+            Write-Host "If you want to add any persistent components, please do so at [$profilePath/Profile.ps1] as there is an updater in the installed profile which uses the hash to update the profile and will lead to loss of changes"
         } elseif ($IsLinux) {
             $profilePath = "$env:HOME/.config/powershell"
+            $outputFile = $profilePath + "/Microsoft.PowerShell_profile.ps1"
+            Invoke-RestMethod -Uri $downloadUrl -OutFile $outputFile
+            Write-Host "The profile @ [$outputFile] has been created."
+            Write-Host "If you want to add any persistent components, please do so at [$profilePath/Profile.ps1] as there is an updater in the installed profile which uses the hash to update the profile and will lead to loss of changes"
         }
 
         # Create profile directories if they do not exist
@@ -67,12 +78,9 @@ if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
             New-Item -Path $profilePath -ItemType "directory"
         }
 
-        # Download the PowerShell profile script
-        $downloadUrl = "https://github.com/Uthallan/powershell-profile/raw/main/Microsoft.PowerShell_profile.ps1"
-        $outputFile = Join-Path -Path $profilePath -ChildPath "Microsoft.PowerShell_profile.ps1"
-        Invoke-RestMethod -Uri $downloadUrl -OutFile $outputFile
-        Write-Host "The profile @ [$outputFile] has been created."
-        Write-Host "If you want to add any persistent components, please do so at [$profilePath\Profile.ps1] as there is an updater in the installed profile which uses the hash to update the profile and will lead to loss of changes"
+        
+        
+        
     }
     catch {
         Write-Error "Failed to create or update the profile. Error: $_"
