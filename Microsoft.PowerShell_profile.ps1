@@ -120,9 +120,15 @@ function touch($file) { "" | Out-File $file -Encoding ASCII }
 
 function ff($name) {
     Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
-        Write-Output $_.FullName  # Using the FullName property
+        Write-Output "$($_.directory)\$($_)"
     }
 }
+
+# function ff($name) {
+#     Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
+#         Write-Output $_.FullName  # Using the FullName property
+#     }
+# }
 
 # Network Utilities
 function Get-PubIP { (Invoke-WebRequest http://ifconfig.me/ip).Content }
