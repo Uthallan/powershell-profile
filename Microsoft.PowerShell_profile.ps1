@@ -27,6 +27,7 @@ function Update-ProfileVersion {
         return
     }
 
+    if ($IsLinux) {
     try {
         $url = "https://raw.githubusercontent.com/Uthallan/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
         $oldhash = Get-FileHash $PROFILE
@@ -34,7 +35,24 @@ function Update-ProfileVersion {
         Invoke-RestMethod $url -OutFile "$env:HOME/temp/Microsoft.PowerShell_profile.ps1"
         Write-Host "Downloaded profile from $url to $env:HOME/temp"
         $newhash = Get-FileHash "$env:HOME/temp/Microsoft.PowerShell_profile.ps1"
-        Write-Host "Hashed profile from github as $newhash"
+        Write-Host "Hashed profile from github as" $newhash.Hash
+        if ($newhash.Hash -ne $oldhash.Hash) {
+            Copy-Item -Path "$env:HOME/temp/Microsoft.PowerShell_profile.ps1" -Destination $PROFILE -Force
+            Write-Host "Profile has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
+        }
+    } catch {
+        Write-Error "Unable to check for $profile updates"
+    } finally {
+        Remove-Item "$env:HOME/temp/Microsoft.PowerShell_profile.ps1" -ErrorAction SilentlyContinue
+    }
+ }
+
+ if ($IsWindows) {
+    try {
+        $url = "https://raw.githubusercontent.com/ChrisTitusTech/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
+        $oldhash = Get-FileHash $PROFILE
+        Invoke-RestMethod $url -OutFile "$env:temp/Microsoft.PowerShell_profile.ps1"
+        $newhash = Get-FileHash "$env:temp/Microsoft.PowerShell_profile.ps1"
         if ($newhash.Hash -ne $oldhash.Hash) {
             Copy-Item -Path "$env:temp/Microsoft.PowerShell_profile.ps1" -Destination $PROFILE -Force
             Write-Host "Profile has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
@@ -44,6 +62,7 @@ function Update-ProfileVersion {
     } finally {
         Remove-Item "$env:temp/Microsoft.PowerShell_profile.ps1" -ErrorAction SilentlyContinue
     }
+ }
 }
 Update-ProfileVersion
 
