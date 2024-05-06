@@ -22,7 +22,7 @@ function Update-ProfileVersion {
     if (-not $global:canConnectToGitHub) {
         Write-Host "Skipping profile update check due to GitHub.com not responding within 1 second." -ForegroundColor Yellow
         return
-    } elseif (-not Test-Path -Path $PROFILE -PathType Leaf) {
+    } elseif (-not (Test-Path -Path $PROFILE -PathType Leaf)) {
         Write-Host "No old profile detected in $PROFILE"
         return
     }
@@ -117,11 +117,18 @@ if ($IsWindows) {
 }
 
 function touch($file) { "" | Out-File $file -Encoding ASCII }
+
 function ff($name) {
+    if ($IsLinux) {
+        Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
+            Write-Output $_.FullName  # Using the FullName property
+        }
+        return
+    }
     Get-ChildItem -recurse -filter "*${name}*" -ErrorAction SilentlyContinue | ForEach-Object {
         Write-Output "$($_.directory)\$($_)"
     }
-}
+}ff
 
 # Network Utilities
 function Get-PubIP { (Invoke-WebRequest http://ifconfig.me/ip).Content }
