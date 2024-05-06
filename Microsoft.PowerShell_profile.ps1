@@ -22,7 +22,7 @@ function Update-ProfileVersion {
     if (-not $global:canConnectToGitHub) {
         Write-Host "Skipping profile update check due to GitHub.com not responding within 1 second." -ForegroundColor Yellow
         return
-    } elseif (Test-Path -Path $PROFILE -PathType Leaf) {
+    } elseif (-not Test-Path -Path $PROFILE -PathType Leaf) {
         Write-Host "No old profile detected in $PROFILE"
         return
     }
@@ -113,7 +113,7 @@ if ($IsWindows) {
         vim $PROFILE.CurrentUserAllHosts
     }
 } elseif ($IsLinux) {
-    
+
 }
 
 function touch($file) { "" | Out-File $file -Encoding ASCII }
