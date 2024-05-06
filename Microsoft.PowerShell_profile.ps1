@@ -18,9 +18,12 @@ if (Test-Path($ChocolateyProfile)) {
 }
 
 # Check for Profile Updates
-function Update-Profile {
+function Update-ProfileVersion {
     if (-not $global:canConnectToGitHub) {
         Write-Host "Skipping profile update check due to GitHub.com not responding within 1 second." -ForegroundColor Yellow
+        return
+    } elseif (Test-Path -Path $PROFILE -PathType Leaf) {
+        Write-Host "No old profile detected in $PROFILE"
         return
     }
 
@@ -39,7 +42,7 @@ function Update-Profile {
         Remove-Item "$env:temp/Microsoft.PowerShell_profile.ps1" -ErrorAction SilentlyContinue
     }
 }
-Update-Profile
+Update-ProfileVersion
 
 function Update-PowerShell {
     if (-not $global:canConnectToGitHub) {
@@ -58,11 +61,11 @@ function Update-PowerShell {
             $updateNeeded = $true
         }
 
-        if ($updateNeeded -and $IsWindows) {
+        if (($updateNeeded) -and ($IsWindows)) {
             Write-Host "Updating PowerShell..." -ForegroundColor Yellow
             winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
             Write-Host "PowerShell has been updated. Please restart your shell to reflect changes" -ForegroundColor Magenta
-        } elseif ($updateNeeded -and $IsLinux) {
+        } elseif (($updateNeeded) -and ($IsLinux)) {
             Write-Warning "Powershell update available. Automation on Linux not yet implemented"
         } else {
             Write-Host "Your PowerShell is up to date." -ForegroundColor Green
