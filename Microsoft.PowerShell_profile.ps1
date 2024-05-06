@@ -30,10 +30,10 @@ function Update-ProfileVersion {
     try {
         $url = "https://raw.githubusercontent.com/Uthallan/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
         $oldhash = Get-FileHash $PROFILE
-        Write-Host "Profile at $PROFILE hashed as $oldhash"
-        Invoke-RestMethod $url -OutFile "$env:temp/Microsoft.PowerShell_profile.ps1"
-        Write-Host "Downloaded profile from $url to $env:temp"
-        $newhash = Get-FileHash "$env:temp/Microsoft.PowerShell_profile.ps1"
+        Write-Host "Profile at $PROFILE hashed as" $oldhash.Hash
+        Invoke-RestMethod $url -OutFile "$env:HOME/temp/Microsoft.PowerShell_profile.ps1"
+        Write-Host "Downloaded profile from $url to $env:HOME/temp"
+        $newhash = Get-FileHash "$env:HOME/temp/Microsoft.PowerShell_profile.ps1"
         Write-Host "Hashed profile from github as $newhash"
         if ($newhash.Hash -ne $oldhash.Hash) {
             Copy-Item -Path "$env:temp/Microsoft.PowerShell_profile.ps1" -Destination $PROFILE -Force
